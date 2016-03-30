@@ -1,0 +1,23 @@
+{
+  "name": "tript-interp",
+  "version": "0.0.1",
+  "description": "The reference interpreter for the Tript scripting language.",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/couchand/tript-interp"
+  },
+  "author": "Andrew Couch <tript@andrewcou.ch>",
+  "license": "MIT",
+  "dependencies": {
+    "tript-schema": "0.0.1",
+    "z-schema": "^3.16.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5"
+  }
+}
