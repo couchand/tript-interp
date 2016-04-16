@@ -40,6 +40,19 @@ describe('typecheck', function() {
           .that.equals('Boolean')
       })
     })
+
+    describe('Literal Number', function() {
+      it('returns the type Number', function() {
+        var typeScope = new Scope()
+
+        var result = typecheck(
+          typeScope,
+          new ast.LiteralNumber({
+            value: 42
+          })
+        )
+      })
+    })
   })
 
   describe('Reference', function() {
@@ -198,6 +211,124 @@ describe('typecheck', function() {
             children: [
               new ast.LiteralBoolean({
                 value: true
+              })
+            ]
+          })
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('value')
+          .that.equals('Boolean')
+      })
+    })
+  })
+
+  describe('numeric expression', function() {
+    describe('Sum', function() {
+      it('expects children to be Number type', function() {
+        var typeScope = new Scope()
+        typeScope.put('foobar', 'Boolean')
+
+        var result = typecheck(
+          typeScope,
+          new ast.Sum({
+            children: [
+              new ast.Reference({
+                name: 'foobar'
+              })
+            ]
+          })
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('error')
+
+        result.error.should.match(/children/)
+          .and.match(/Number/)
+      })
+
+      it('has Number type with no children', function() {
+        var typeScope = new Scope()
+
+        var result = typecheck(
+          typeScope,
+          new ast.Sum({
+            children: []
+          })
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('value')
+          .that.equals('Number')
+      })
+
+      it('has Number type with Number children', function() {
+        var typeScope = new Scope()
+
+        var result = typecheck(
+          typeScope,
+          new ast.Sum({
+            children: [
+              new ast.LiteralNumber({
+                value: 42
+              })
+            ]
+          })
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('value')
+          .that.equals('Number')
+      })
+    })
+
+    describe('Equal', function() {
+      it('expects children to be Number type', function() {
+        var typeScope = new Scope()
+        typeScope.put('foobar', 'Boolean')
+
+        var result = typecheck(
+          typeScope,
+          new ast.Equal({
+            children: [
+              new ast.Reference({
+                name: 'foobar'
+              })
+            ]
+          })
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('error')
+
+        result.error.should.match(/children/)
+          .and.match(/Number/)
+      })
+
+      it('has Boolean type with no children', function() {
+        var typeScope = new Scope()
+
+        var result = typecheck(
+          typeScope,
+          new ast.Equal({
+            children: []
+          })
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('value')
+          .that.equals('Boolean')
+      })
+
+      it('has Boolean type with Number children', function() {
+        var typeScope = new Scope()
+
+        var result = typecheck(
+          typeScope,
+          new ast.Equal({
+            children: [
+              new ast.LiteralNumber({
+                value: 42
               })
             ]
           })

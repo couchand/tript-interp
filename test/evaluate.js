@@ -44,6 +44,25 @@ describe('evaluate', function() {
           .that.equals(false)
       })
     })
+
+    describe('LiteralNumber', function() {
+      it('returns a Number', function() {
+        var scope = new Scope()
+
+        var result = evaluate(
+          scope,
+          new ast.LiteralNumber({
+            value: 42
+          })
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('type')
+          .that.equals('Number')
+        result.should.have.property('value')
+          .that.equals(42)
+      })
+    })
   })
 
   describe('Reference', function() {
@@ -97,6 +116,154 @@ describe('evaluate', function() {
       expect(result).to.be.an('object')
       result.should.have.property('error')
       result.error.should.match(/not found/)
+    })
+  })
+
+  describe('numeric expression', function() {
+    function makeNumeric(op, literals) {
+      return new ast[op]({
+        children: literals.map((literal) =>
+          new ast.LiteralNumber({
+            value: literal
+          })
+        )
+      })
+    }
+
+    describe('Sum', function() {
+      it('is zero for empty children', function() {
+        var scope = new Scope()
+
+        var result = evaluate(
+          scope,
+          makeNumeric('Sum', [])
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('type')
+          .that.equals('Number')
+        result.should.have.property('value')
+          .that.equals(0)
+      }),
+
+      it('is the sum of the children', function() {
+        var scope = new Scope()
+
+        var result = evaluate(
+          scope,
+          makeNumeric('Sum', [1, 2, 3])
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('type')
+          .that.equals('Number')
+        result.should.have.property('value')
+          .that.equals(6)
+      })
+
+      it('expects children to be Number', function() {
+        var scope = new Scope()
+        scope.put('foobar', { type: 'Boolean', value: true })
+
+        var result = evaluate(
+          scope,
+          new ast.Sum({
+            children: [
+              new ast.Reference({
+                name: 'foobar'
+              })
+            ]
+          })
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('errors')
+          .that.has.lengthOf(1)
+        result.errors[0].should.match(/children/)
+      })
+    })
+
+    describe('Equal', function() {
+      it('is true for empty children', function() {
+        var scope = new Scope()
+
+        var result = evaluate(
+          scope,
+          makeNumeric('Equal', [])
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('type')
+          .that.equals('Boolean')
+        result.should.have.property('value')
+          .that.equals(true)
+      }),
+
+      it('is true for single child', function() {
+        var scope = new Scope()
+
+        var result = evaluate(
+          scope,
+          makeNumeric('Equal', [42])
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('type')
+          .that.equals('Boolean')
+        result.should.have.property('value')
+          .that.equals(true)
+      }),
+
+      it('is true when all children are equal', function() {
+        var scope = new Scope()
+
+        var result = evaluate(
+          scope,
+          makeNumeric('Equal', [42, 42, 42])
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('type')
+          .that.equals('Boolean')
+        result.should.have.property('value')
+          .that.equals(true)
+      })
+
+      it('is false when any child is not equal', function() {
+        var scope = new Scope()
+
+        var result = evaluate(
+          scope,
+          makeNumeric('Equal', [42, 1, 42])
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('type')
+          .that.equals('Boolean')
+        result.should.have.property('value')
+          .that.equals(false)
+      })
+
+      it('expects children to be Number', function() {
+        var scope = new Scope()
+        scope.put('foobar', { type: 'Boolean', value: 42 })
+
+        var result = evaluate(
+          scope,
+          new ast.Equal({
+            children: [
+              new ast.Reference({
+                name: 'foobar'
+              })
+            ]
+          })
+        )
+
+        expect(result).to.be.an('object')
+        result.should.have.property('errors')
+          .that.has.lengthOf(1)
+        result.errors[0].should.match(/children/)
+      })
     })
   })
 
